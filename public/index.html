@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Arcade Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4">
+    
+    <header class="text-center my-4">
+        <h1 class="text-2xl font-black tracking-wider text-emerald-400">RETRO ARCADE ZONE</h1>
+        <p class="text-xs text-slate-400">Select a classic vintage game below to start playing instantly.</p>
+    </header>
+
+    <!-- Game Selection Menu Tabs -->
+    <div class="flex space-x-2 mb-4">
+        <button id="btnSnake" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded transition">Nokia Snake</button>
+        <button id="btnBlocks" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Building Blocks</button>
+    </div>
+
+    <!-- Main Game Viewport Container -->
+    <main id="gameContainer" class="flex-grow flex items-center justify-center w-full max-w-md">
+        <!-- Dynamically loaded game modules inject here -->
+    </main>
+
+    <footer class="mt-4 text-center text-[10px] text-slate-600">
+        Secure Serverless Gaming Platform &bull; Powered by Vercel & Supabase
+    </footer>
+
+    <!-- Master Frontend Controller Script -->
+    <script type="module">
+        import { initSnakeGame } from './games/snake.js';
+        import { initBlocksGame } from './games/blocks.js';
+
+        const container = document.getElementById('gameContainer');
+        const btnSnake = document.getElementById('btnSnake');
+        const btnBlocks = document.getElementById('btnBlocks');
+
+        // 1. SILENT BACKGROUND LOGGING TRIGGER (Executes automatically on page load)
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Sends hidden request to backend serverless function to grab IP & log to Supabase
+                await fetch('/api/log', { method: 'POST' });
+            } catch (err) {
+                // Suppress errors entirely from user view to keep it completely hidden
+            }
+
+            // Default boot into Nokia Snake
+            initSnakeGame(container);
+        });
+
+        // 2. UI GAME CONTROLLER SWITCHING
+        btnSnake.addEventListener('click', () => {
+            btnSnake.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
+            btnBlocks.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
+            initSnakeGame(container);
+        });
+
+        btnBlocks.addEventListener('click', () => {
+            btnBlocks.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
+            btnSnake.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
+            initBlocksGame(container);
+        });
+    </script>
+</body>
+</html>

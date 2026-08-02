@@ -1,0 +1,14 @@
+{
+  "name": "retropulse",
+  "version": "1.0.0",
+  "description": "Vintage game portal with silent network logging",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "axios": "^1.6.8",
+    "@supabase/supabase-js": "^2.39.8"
+  }
+}
