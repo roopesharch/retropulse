@@ -53,7 +53,7 @@ app.post('/api/log', async (req, res) => {
         console.error('Geolocation fetch error:', error.message);
     }
 
-    // Insert record into your existing Supabase table named 'visitors'
+    // Insert record into the 'visitors' table inside your Supabase database
     try {
         const { error } = await supabase
             .from('visitors')
@@ -71,6 +71,8 @@ app.post('/api/log', async (req, res) => {
 
         if (error) {
             console.error('Supabase DB Error:', error.message);
+        } else {
+            console.log(`Successfully logged visit from IP: ${geoData.ip} (${geoData.city})`);
         }
     } catch (dbError) {
         console.error('Database connection exception:', dbError.message);
