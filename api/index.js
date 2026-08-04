@@ -30,6 +30,15 @@ function getISTTimestamp() {
     }).format(now).replace(',', '');
 }
 
+// Handle GET requests for /game
+app.get('/game', (req, res) => {
+    // If you have a specific game file in your public folder (e.g. public/game.html), use this:
+    // res.sendFile(path.join(__dirname, '../public/game.html'));
+    
+    // Otherwise, it serves your main public index or a custom response:
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
 app.post('/api/log', async (req, res) => {
     // Check if the request origin/path indicates the game route
     const requestPath = req.headers['referer'] || req.body.path || '';
