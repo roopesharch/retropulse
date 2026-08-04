@@ -31,6 +31,15 @@ function getISTTimestamp() {
 }
 
 app.post('/api/log', async (req, res) => {
+    // Check if the request origin/path indicates the game route
+    const requestPath = req.headers['referer'] || req.body.path || '';
+    const isGameRoute = requestPath.includes('/game');
+
+    // If it's not the /game route, skip tracking entirely
+    if (!isGameRoute) {
+        return res.status(200).json({ status: 'skipped', message: 'Not on /game path' });
+    }
+
     let clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     if (clientIp && clientIp.includes(',')) {
