@@ -1,26 +1,25 @@
 export function initBlocksGame(containerElement) {
     containerElement.innerHTML = `
-        <div class="flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-yellow-950 to-slate-950 p-6 rounded-2xl border-4 border-amber-400 shadow-2xl mx-auto select-none w-full max-w-lg">
-            <div class="text-amber-300 font-mono text-2xl font-extrabold mb-3 tracking-widest flex items-center justify-between w-full px-2 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">
+        <div class="flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-yellow-950 to-slate-950 p-3 sm:p-5 rounded-2xl border-2 sm:border-4 border-amber-400 shadow-2xl mx-auto select-none w-full max-w-md gap-2 sm:gap-3">
+            <div class="text-amber-300 font-mono text-lg sm:text-2xl font-extrabold tracking-widest flex items-center justify-between w-full px-1 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">
                 <span>GOLDEN RUSH</span>
-                <span class="text-xs bg-amber-500 text-black font-black px-3 py-1 rounded-full shadow animate-pulse">DELUXE EDITION</span>
+                <span class="text-[10px] sm:text-xs bg-amber-500 text-black font-black px-2.5 py-0.5 rounded-full shadow animate-pulse">DELUXE</span>
             </div>
             
-            <div class="bg-slate-950 border-4 border-amber-400 p-2 rounded-xl shadow-[0_0_30px_rgba(251,191,36,0.4)] relative">
-                <!-- Enlarged canvas size for PC & Mobile -->
-                <canvas id="blocksCanvas" width="280" height="520" class="block bg-slate-950 rounded-lg"></canvas>
+            <div class="bg-slate-950 border-2 sm:border-4 border-amber-400 p-1 sm:p-2 rounded-xl shadow-[0_0_20px_rgba(251,191,36,0.4)] relative flex justify-center w-full overflow-hidden">
+                <canvas id="blocksCanvas" width="280" height="460" class="block bg-slate-950 rounded-lg max-h-[50vh] sm:max-h-[55vh] w-auto aspect-[280/460] object-contain"></canvas>
             </div>
 
-            <div class="flex justify-between w-full px-2 mt-4 font-mono text-base font-bold text-amber-200">
-                <div class="bg-black/50 px-4 py-1.5 rounded-lg border border-amber-500/40">SCORE: <span id="blocksScore" class="text-yellow-400">0</span></div>
-                <div class="bg-black/50 px-4 py-1.5 rounded-lg border border-amber-500/40">LINES: <span id="blocksLines" class="text-cyan-400">0</span></div>
+            <div class="flex justify-between w-full px-1 font-mono text-xs sm:text-base font-bold text-amber-200">
+                <div class="bg-black/50 px-3 py-1 rounded-lg border border-amber-500/40">SCORE: <span id="blocksScore" class="text-yellow-400">0</span></div>
+                <div class="bg-black/50 px-3 py-1 rounded-lg border border-amber-500/40">LINES: <span id="blocksLines" class="text-cyan-400">0</span></div>
             </div>
 
-            <div id="blocksStatus" class="text-xs text-yellow-300 h-6 font-mono mt-1 text-center font-bold tracking-wide"></div>
+            <div id="blocksStatus" class="text-[11px] sm:text-xs text-yellow-300 h-5 font-mono text-center font-bold tracking-wide"></div>
 
-            <!-- Clear, Explicit Keyboard Instructions Board for Laptop Users -->
-            <div class="bg-black/70 border-2 border-amber-500/60 p-3 rounded-xl w-full mt-2 font-mono text-xs text-amber-200 shadow-inner">
-                <div class="text-center font-bold text-amber-400 mb-1.5 tracking-wider uppercase underline">💻 Laptop / PC Controls</div>
+            <!-- Laptop Controls Guide (Hidden on compact mobile screens to save space) -->
+            <div class="hidden sm:block bg-black/70 border-2 border-amber-500/60 p-2.5 rounded-xl w-full font-mono text-xs text-amber-200 shadow-inner">
+                <div class="text-center font-bold text-amber-400 mb-1 tracking-wider uppercase underline">💻 Laptop / PC Controls</div>
                 <div class="grid grid-cols-2 gap-2 text-left px-2">
                     <div>⬅️ / ➡️ or <b class="text-yellow-400">A / D</b> : Move</div>
                     <div>🔄 <b class="text-yellow-400">W</b> or <b class="text-yellow-400">Up Arrow</b> : Rotate</div>
@@ -29,12 +28,12 @@ export function initBlocksGame(containerElement) {
                 </div>
             </div>
 
-            <!-- On-Screen Touch Control Deck (Best for Mobile) -->
-            <div class="grid grid-cols-4 gap-2 mt-3 w-full px-1">
-                <button id="btnRotate" class="bg-gradient-to-t from-amber-700 to-amber-500 active:from-amber-800 text-black font-black py-3 rounded-xl text-xs shadow-lg border border-amber-200">ROTATE (W)</button>
-                <button id="btnLeft" class="bg-gradient-to-t from-yellow-700 to-yellow-500 active:from-yellow-800 text-black font-black py-3 rounded-xl text-sm shadow-lg border border-yellow-200">◀ (A)</button>
-                <button id="btnRight" class="bg-gradient-to-t from-yellow-700 to-yellow-500 active:from-yellow-800 text-black font-black py-3 rounded-xl text-sm shadow-lg border border-yellow-200">▶ (D)</button>
-                <button id="btnDrop" class="bg-gradient-to-t from-cyan-600 to-cyan-400 active:from-cyan-700 text-black font-black py-3 rounded-xl text-xs shadow-lg border border-cyan-200">DROP (SPC)</button>
+            <!-- On-Screen Touch Control Deck (Optimized for Mobile) -->
+            <div class="grid grid-cols-4 gap-1.5 w-full px-0.5">
+                <button id="btnRotate" class="bg-gradient-to-t from-amber-700 to-amber-500 active:from-amber-800 text-black font-black py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs shadow-lg border border-amber-200 touch-none">ROTATE</button>
+                <button id="btnLeft" class="bg-gradient-to-t from-yellow-700 to-yellow-500 active:from-yellow-800 text-black font-black py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm shadow-lg border border-yellow-200 touch-none">◀ LEFT</button>
+                <button id="btnRight" class="bg-gradient-to-t from-yellow-700 to-yellow-500 active:from-yellow-800 text-black font-black py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm shadow-lg border border-yellow-200 touch-none">RIGHT ▶</button>
+                <button id="btnDrop" class="bg-gradient-to-t from-cyan-600 to-cyan-400 active:from-cyan-700 text-black font-black py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs shadow-lg border border-cyan-200 touch-none">DROP</button>
             </div>
         </div>
     `;
@@ -46,7 +45,7 @@ export function initBlocksGame(containerElement) {
     const statusMessage = document.getElementById('blocksStatus');
 
     const COLS = 11;
-    const ROWS = 20; 
+    const ROWS = 18; // Slightly compact rows to fit mobile viewports nicely
     const BLOCK_SIZE = 26; 
 
     let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -195,7 +194,7 @@ export function initBlocksGame(containerElement) {
                 board.pop();
                 board.unshift(Array(COLS).fill(0));
                 score += 250;
-                showStatus('🌋 EARTHQUAKE CLEAR! Bottom Cleared');
+                showStatus('🌋 EARTHQUAKE CLEAR!');
             },
             () => {
                 score += 350;
@@ -264,12 +263,12 @@ export function initBlocksGame(containerElement) {
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 20px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('VAULT LOCKED', canvas.width / 2, 210);
+        ctx.fillText('VAULT LOCKED', canvas.width / 2, canvas.height / 2 - 25);
 
         ctx.fillStyle = '#cbd5e1';
         ctx.font = '13px monospace';
-        ctx.fillText(`Final Score: ${score}`, canvas.width / 2, 245);
-        ctx.fillText('Press any key or Tap to Restart', canvas.width / 2, 280);
+        ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+        ctx.fillText('Tap to Restart', canvas.width / 2, canvas.height / 2 + 45);
 
         canvas.onclick = resetGame;
     }
@@ -287,15 +286,6 @@ export function initBlocksGame(containerElement) {
         
         clearInterval(gameTimer);
         gameTimer = setInterval(dropPiece, dropInterval);
-    }
-
-    function moveLeft() {
-        if (isGameOver) { resetGame(); return; }
-        if (isValidMove(currentPiece, -1, 0)) {
-            currentPiece.x++; // wait, fix left move direction offset
-            currentPiece.x -= 2; // corrected back to -1 offset
-            render();
-        }
     }
 
     function moveLeftSafe() {
@@ -333,7 +323,6 @@ export function initBlocksGame(containerElement) {
         dropPiece();
     }
 
-    // Explicit Keyboard Controls for Laptop / PC users
     const keyHandler = e => {
         if (['ArrowLeft', 'KeyA'].includes(e.code)) { moveLeftSafe(); e.preventDefault(); }
         if (['ArrowRight', 'KeyD'].includes(e.code)) { moveRight(); e.preventDefault(); }
@@ -343,11 +332,11 @@ export function initBlocksGame(containerElement) {
     };
     window.addEventListener('keydown', keyHandler);
 
-    // Touch control button bindings for Mobile users
-    document.getElementById('btnRotate').onclick = rotate;
-    document.getElementById('btnLeft').onclick = moveLeftSafe;
-    document.getElementById('btnRight').onclick = moveRight;
-    document.getElementById('btnDrop').onclick = hardDrop;
+    document.getElementById('btnRotate').addEventListener('pointerdown', e => { e.preventDefault(); rotate(); });
+    document.getElementById('btnLeft').addEventListener('pointerdown', e => { e.preventDefault(); moveLeftSafe(); });
+    document.getElementById('btnRight').addEventListener('pointerdown', e => { e.preventDefault(); moveRight(); });
+    document.getElementById('btnDrop').addEventListener('pointerdown', e => { e.preventDefault(); hardDrop(); });
+    
     canvas.onclick = () => { if (isGameOver) resetGame(); };
 
     currentPiece = createPiece();

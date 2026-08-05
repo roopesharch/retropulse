@@ -6,7 +6,7 @@ export function initSnakeGame(containerElement) {
                 <span class="text-xs bg-pink-500/80 text-white px-2.5 py-1 rounded-full shadow animate-pulse">ULTRA MODE</span>
             </div>
             
-            <div class="bg-white border-4 border-cyan-400 p-2 rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+            <div class="bg-white border-4 border-cyan-400 p-2 rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.5)] relative">
                 <canvas id="snakeCanvas" width="300" height="300" class="block bg-white rounded-lg cursor-pointer"></canvas>
             </div>
 
@@ -35,8 +35,8 @@ export function initSnakeGame(containerElement) {
     const highScoreElement = document.getElementById('snakeHighScore');
     const statusMessage = document.getElementById('statusMessage');
 
-    const GRID_SIZE = 25; // Expanded grid for a larger play area
-    const TILE_SIZE = 12; // 25 * 12 = 300px canvas width/height
+    const GRID_SIZE = 25; 
+    const TILE_SIZE = 12; 
 
     let snake = [{ x: 12, y: 12 }, { x: 12, y: 13 }, { x: 12, y: 14 }];
     let food = { x: 5, y: 5, type: 'normal' };
@@ -45,14 +45,39 @@ export function initSnakeGame(containerElement) {
     let bountySpawnTimer = null;
 
     let dx = 0;
-    let dy = -1;
+    let dy = 0; // Starts at 0 so snake doesn't move automatically
     let score = 0;
     let highScore = localStorage.getItem('neoSnakeHighScore') || 0;
     let gameInterval;
     let gameSpeed = 90;
     let isGameOver = false;
+    let isGameStarted = false;
 
     highScoreElement.innerText = highScore;
+
+    // Initial Start Screen Render
+    renderStartScreen();
+
+    function renderStartScreen() {
+        clearCanvas();
+        drawGridLines();
+        
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 18px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('NEO SNAKE', canvas.width / 2, 110);
+
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 14px monospace';
+        ctx.fillText('► CLICK TO PLAY ◄', canvas.width / 2, 150);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px monospace';
+        ctx.fillText('Use Arrow Keys or D-Pad', canvas.width / 2, 185);
+    }
 
     function startGameLoop() {
         clearInterval(gameInterval);
@@ -60,7 +85,7 @@ export function initSnakeGame(containerElement) {
     }
 
     function main() {
-        if (isGameOver) return;
+        if (isGameOver || !isGameStarted) return;
         clearCanvas();
         drawGridLines();
         drawSpecialBounty();
@@ -97,7 +122,6 @@ export function initSnakeGame(containerElement) {
             ctx.shadowBlur = index === 0 ? 8 : 2;
 
             if (index === 0) {
-                // Snake Head: Vibrant glossy green gradient with eyes
                 let grad = ctx.createRadialGradient(
                     part.x * TILE_SIZE + 6, part.y * TILE_SIZE + 6, 1,
                     part.x * TILE_SIZE + 6, part.y * TILE_SIZE + 6, 6
@@ -109,12 +133,10 @@ export function initSnakeGame(containerElement) {
                 ctx.roundRect(part.x * TILE_SIZE + 1, part.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2, 4);
                 ctx.fill();
 
-                // Eyes
                 ctx.fillStyle = '#0f172a';
                 ctx.fillRect(part.x * TILE_SIZE + 3, part.y * TILE_SIZE + 3, 2, 2);
                 ctx.fillRect(part.x * TILE_SIZE + 7, part.y * TILE_SIZE + 3, 2, 2);
             } else {
-                // Snake Body: Smooth emerald green segments
                 ctx.fillStyle = index % 2 === 0 ? '#10b981' : '#059669';
                 ctx.beginPath();
                 ctx.roundRect(part.x * TILE_SIZE + 2, part.y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4, 3);
@@ -128,12 +150,10 @@ export function initSnakeGame(containerElement) {
         ctx.save();
         ctx.shadowColor = '#ef4444';
         ctx.shadowBlur = 6;
-        // Standard Glowing Red Apple
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
         ctx.arc(food.x * TILE_SIZE + 6, food.y * TILE_SIZE + 6, 5, 0, Math.PI * 2);
         ctx.fill();
-        // Stem
         ctx.strokeStyle = '#78350f';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -150,7 +170,6 @@ export function initSnakeGame(containerElement) {
         let by = specialBounty.y * TILE_SIZE + 6;
 
         if (specialBounty.type === 'fast') {
-            // Glowing Light Blue Apple
             ctx.shadowColor = '#38bdf8';
             ctx.shadowBlur = 10;
             ctx.fillStyle = '#38bdf8';
@@ -158,7 +177,6 @@ export function initSnakeGame(containerElement) {
             ctx.arc(bx, by, 5.5, 0, Math.PI * 2);
             ctx.fill();
         } else if (specialBounty.type === 'slow') {
-            // Purple Grapes cluster
             ctx.shadowColor = '#c084fc';
             ctx.shadowBlur = 10;
             ctx.fillStyle = '#c084fc';
@@ -168,7 +186,6 @@ export function initSnakeGame(containerElement) {
             ctx.arc(bx, by + 2, 3, 0, Math.PI * 2);
             ctx.fill();
         } else if (specialBounty.type === 'shrink') {
-            // Golden Pipeline Apple
             ctx.shadowColor = '#fbbf24';
             ctx.shadowBlur = 10;
             ctx.fillStyle = '#fbbf24';
@@ -176,7 +193,6 @@ export function initSnakeGame(containerElement) {
             ctx.rect(specialBounty.x * TILE_SIZE + 2, specialBounty.y * TILE_SIZE + 2, 8, 8);
             ctx.fill();
         } else if (specialBounty.type === 'grow') {
-            // Glowing Golden Sun Orb
             ctx.shadowColor = '#f59e0b';
             ctx.shadowBlur = 12;
             ctx.fillStyle = '#f59e0b';
@@ -191,7 +207,6 @@ export function initSnakeGame(containerElement) {
         let headX = snake[0].x + dx;
         let headY = snake[0].y + dy;
 
-        // Mirror / Wrap-around boundary logic
         if (headX < 0) headX = GRID_SIZE - 1;
         if (headX >= GRID_SIZE) headX = 0;
         if (headY < 0) headY = GRID_SIZE - 1;
@@ -199,7 +214,6 @@ export function initSnakeGame(containerElement) {
 
         const head = { x: headX, y: headY };
 
-        // Check self collision
         for (let i = 0; i < snake.length; i++) {
             if (snake[i].x === head.x && snake[i].y === head.y) {
                 triggerGameOver();
@@ -209,7 +223,6 @@ export function initSnakeGame(containerElement) {
 
         snake.unshift(head);
 
-        // Check food collision
         let eaten = false;
         if (snake[0].x === food.x && snake[0].y === food.y) {
             score += 10;
@@ -217,7 +230,6 @@ export function initSnakeGame(containerElement) {
             generateFood();
         }
 
-        // Check special bounty collision
         if (specialBounty && snake[0].x === specialBounty.x && snake[0].y === specialBounty.y) {
             applyBountyEffect(specialBounty.type);
             specialBounty = null;
@@ -278,7 +290,7 @@ export function initSnakeGame(containerElement) {
     }
 
     function spawnSpecialBountyRandomly() {
-        if (isGameOver || specialBounty) return;
+        if (isGameOver || !isGameStarted || specialBounty) return;
         const types = ['fast', 'slow', 'shrink', 'grow'];
         const chosenType = types[Math.floor(Math.random() * types.length)];
         
@@ -287,7 +299,6 @@ export function initSnakeGame(containerElement) {
         
         specialBounty = { x: bx, y: by, type: chosenType };
 
-        // Bounty disappears after 7 seconds if not eaten
         bountyTimer = setTimeout(() => {
             if (specialBounty && specialBounty.type === chosenType) {
                 specialBounty = null;
@@ -297,6 +308,7 @@ export function initSnakeGame(containerElement) {
 
     function triggerGameOver() {
         isGameOver = true;
+        isGameStarted = false;
         clearInterval(gameInterval);
         clearInterval(bountySpawnTimer);
         clearTimeout(bountyTimer);
@@ -312,20 +324,18 @@ export function initSnakeGame(containerElement) {
         ctx.fillStyle = '#cbd5e1';
         ctx.font = '12px monospace';
         ctx.fillText(`Final Score: ${score}`, canvas.width / 2, 145);
-        ctx.fillText('Tap Canvas to Restart', canvas.width / 2, 175);
-
-        canvas.onclick = resetGame;
+        ctx.fillText('Click to Restart', canvas.width / 2, 175);
     }
 
     function resetGame() {
-        canvas.onclick = null;
         snake = [{ x: 12, y: 12 }, { x: 12, y: 13 }, { x: 12, y: 14 }];
         score = 0;
         gameSpeed = 90;
         dx = 0;
-        dy = -1;
+        dy = -1; // Default moving up upon starting
         specialBounty = null;
         isGameOver = false;
+        isGameStarted = true;
         scoreElement.innerText = score;
         statusMessage.innerText = '';
         generateFood();
@@ -336,7 +346,7 @@ export function initSnakeGame(containerElement) {
     }
 
     function changeDirection(newDx, newDy) {
-        if (isGameOver) {
+        if (!isGameStarted || isGameOver) {
             resetGame();
             return;
         }
@@ -349,7 +359,6 @@ export function initSnakeGame(containerElement) {
         }
     }
 
-    // Keyboard bindings
     const keyHandler = e => {
         if (['ArrowUp', 'KeyW'].includes(e.code)) { changeDirection(0, -1); e.preventDefault(); }
         if (['ArrowDown', 'KeyS'].includes(e.code)) { changeDirection(0, 1); e.preventDefault(); }
@@ -358,14 +367,16 @@ export function initSnakeGame(containerElement) {
     };
     window.addEventListener('keydown', keyHandler);
 
-    // Touch D-Pad bindings
     document.getElementById('btnUp').onclick = () => changeDirection(0, -1);
     document.getElementById('btnDown').onclick = () => changeDirection(0, 1);
     document.getElementById('btnLeft').onclick = () => changeDirection(-1, 0);
     document.getElementById('btnRight').onclick = () => changeDirection(1, 0);
-    canvas.onclick = () => { if (isGameOver) resetGame(); };
+    
+    canvas.onclick = () => {
+        if (!isGameStarted || isGameOver) {
+            resetGame();
+        }
+    };
 
     generateFood();
-    startGameLoop();
-    bountySpawnTimer = setInterval(spawnSpecialBountyRandomly, 12000);
 }
